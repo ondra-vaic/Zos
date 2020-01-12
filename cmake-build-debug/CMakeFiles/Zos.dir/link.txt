@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Zos.dir/main.cpp.o CMakeFiles/Zos.dir/FileSystem.cpp.o CMakeFiles/Zos.dir/Utils.cpp.o CMakeFiles/Zos.dir/SuperBlock.cpp.o CMakeFiles/Zos.dir/PseudoInode.cpp.o CMakeFiles/Zos.dir/DirectoryItem.cpp.o CMakeFiles/Zos.dir/Bitmap.cpp.o  -o Zos 

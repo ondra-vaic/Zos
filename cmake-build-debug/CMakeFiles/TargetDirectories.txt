@@ -1,0 +1,3 @@
+/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir
+/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/edit_cache.dir
