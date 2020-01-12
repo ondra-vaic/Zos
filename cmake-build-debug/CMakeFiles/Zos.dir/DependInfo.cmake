@@ -7,6 +7,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/me/CLionProjects/Zos/Bitmap.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/Bitmap.cpp.o"
   "/home/me/CLionProjects/Zos/DirectoryItem.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/DirectoryItem.cpp.o"
   "/home/me/CLionProjects/Zos/FileSystem.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/FileSystem.cpp.o"
+  "/home/me/CLionProjects/Zos/Indirect.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/Indirect.cpp.o"
   "/home/me/CLionProjects/Zos/PseudoInode.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/PseudoInode.cpp.o"
   "/home/me/CLionProjects/Zos/SuperBlock.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/SuperBlock.cpp.o"
   "/home/me/CLionProjects/Zos/Utils.cpp" "/home/me/CLionProjects/Zos/cmake-build-debug/CMakeFiles/Zos.dir/Utils.cpp.o"

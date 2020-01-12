@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/Zos.dir/Bitmap.cpp.o"
   "CMakeFiles/Zos.dir/DirectoryItem.cpp.o"
   "CMakeFiles/Zos.dir/FileSystem.cpp.o"
+  "CMakeFiles/Zos.dir/Indirect.cpp.o"
   "CMakeFiles/Zos.dir/PseudoInode.cpp.o"
   "CMakeFiles/Zos.dir/SuperBlock.cpp.o"
   "CMakeFiles/Zos.dir/Utils.cpp.o"

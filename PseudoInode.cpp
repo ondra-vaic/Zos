@@ -11,6 +11,8 @@ PseudoInode::PseudoInode(){
     isDirectory = false;
     references = 0;
     file_size = 0;
+    dot = FREE_DATA_PART;
+    dotDot = FREE_DATA_PART;
 
     for (int& i : direct) {
         i = FREE_DATA_PART;
@@ -34,6 +36,8 @@ PseudoInode::PseudoInode(const string& fileSystemName, int offset){
         stream.read((char*)&i, sizeof(i));
     }
 
+    stream.read((char*)&dot, sizeof(dot));
+    stream.read((char*)&dotDot, sizeof(dotDot));
     stream.read((char*)&indirect1, sizeof(indirect1));
     stream.read((char*)&indirect2, sizeof(indirect2));
 
@@ -54,6 +58,8 @@ void PseudoInode::Save(const string& fileSystemName, int offset){
         stream.write((char*)&i, sizeof(i));
     }
 
+    stream.write((char*)&dot, sizeof(dot));
+    stream.write((char*)&dotDot, sizeof(dotDot));
     stream.write((char*)&indirect1, sizeof(indirect1));
     stream.write((char*)&indirect2, sizeof(indirect2));
 

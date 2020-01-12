@@ -12,6 +12,7 @@
 #include "PseudoInode.h"
 #include "DirectoryItem.h"
 #include "Bitmap.h"
+#include "Indirect.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -59,6 +60,8 @@ bool FileSystem::format(const vector<string>& params){
     //create root inode
     PseudoInode rootInode;
     rootInode.isDirectory = true;
+    rootInode.dot = dataStartAddress;
+    rootInode.dotDot = dataStartAddress;
     rootInode.Save(name, inodeStartAddress);
 
     //create the rest of inodes
@@ -68,45 +71,10 @@ bool FileSystem::format(const vector<string>& params){
     }
 
     //create root directory, it is saved at the start of data part and points to first inode
-    root = DirectoryItem{inodeStartAddress, "root"};
+    root = DirectoryItem{inodeStartAddress, "/"};
     root.Save(name, dataStartAddress);
 
     currentDir = root;
-
-//    DirectoryItem a{inodeStartAddress, "a"};
-//    a.Save(name, dataStartAddress + sizeof(DirectoryItem));
-//
-//    DirectoryItem b{inodeStartAddress, "b"};
-//    b.Save(name, dataStartAddress + sizeof(DirectoryItem) * 2);
-//
-//    DirectoryItem c{inodeStartAddress, "c"};
-//    c.Save(name, dataStartAddress + sizeof(DirectoryItem) * 3);
-//
-//    DirectoryItem d{inodeStartAddress, "d"};
-//    d.Save(name, dataStartAddress + sizeof(DirectoryItem) * 4);
-//
-//    DirectoryItem e{inodeStartAddress, "e"};
-//    e.Save(name, dataStartAddress + sizeof(DirectoryItem) * 5);
-//
-//
-//    rootInode.direct[0] = dataStartAddress + sizeof(DirectoryItem);
-//    rootInode.direct[1] = dataStartAddress + sizeof(DirectoryItem) * 2;
-//    rootInode.direct[2] = dataStartAddress + sizeof(DirectoryItem) * 3;
-//    rootInode.direct[3] = dataStartAddress + sizeof(DirectoryItem) * 4;
-//    rootInode.direct[4] = dataStartAddress + sizeof(DirectoryItem) * 5;
-//
-//    PseudoInode indirect{name, inodeStartAddress + (int32_t)sizeof(indirect)};
-//    rootInode.indirect1 = inodeStartAddress + sizeof(indirect);
-//
-//    //indirect.direct[4] = dataStartAddress + sizeof(DirectoryItem);
-//    indirect.direct[3] = dataStartAddress + sizeof(DirectoryItem) * 2;
-//    indirect.direct[2] = dataStartAddress + sizeof(DirectoryItem) * 3;
-//    indirect.direct[1] = dataStartAddress + sizeof(DirectoryItem) * 4;
-//    indirect.direct[0] = dataStartAddress + sizeof(DirectoryItem) * 5;
-//
-//    indirect.Save(name,  rootInode.indirect1);
-//    rootInode.Save(name, inodeStartAddress);
-
     return true;
 }
 
@@ -137,7 +105,7 @@ vector<int32_t> FileSystem::getReferencedInodes(int32_t inode){
         return nodes;
 
 
-    PseudoInode indirectNode(name, mainInode.indirect1);
+    Indirect indirectNode(name, mainInode.indirect1);
     //add all direct nodes of the first indirect
     for(int32_t direct : indirectNode.direct){
         if(direct != ID_ITEM_FREE){
@@ -152,10 +120,10 @@ vector<int32_t> FileSystem::getReferencedInodes(int32_t inode){
         return nodes;
 
     //for all direct nodes of the second indirect
-    PseudoInode doubleIndirectNode(name, mainInode.indirect2);
+    Indirect doubleIndirectNode(name, mainInode.indirect2);
     for(int32_t indirect : doubleIndirectNode.direct) {
 
-        PseudoInode simpleIndirect{name, indirect};
+        Indirect simpleIndirect{name, indirect};
         //add all direct nodes of the simple indirect
         for(int32_t direct : simpleIndirect.direct){
             if(direct != ID_ITEM_FREE){
@@ -171,42 +139,51 @@ vector<int32_t> FileSystem::getReferencedInodes(int32_t inode){
 }
 
 //can be optimized by traversing backwards
-bool FileSystem::setFirstFreeInodeTo(int32_t parent, int32_t address){
-    vector<int32_t> clusters;
-    PseudoInode mainInode(name, parent);
+bool FileSystem::setFirstEmptyReferenceTo(int32_t parent, int32_t address){
 
-    //add all direct nodes
-    for(int32_t& direct : mainInode.direct){;
+    PseudoInode inode(name, parent);
+
+    for(int32_t& direct : inode.direct){;
         if(direct == ID_ITEM_FREE){
             direct = address;
-            mainInode.Save(name, parent);
+            inode.Save(name, parent);
             return true;
         }
     }
 
-    if(mainInode.indirect1 == ID_ITEM_FREE){
-
+    if(inode.indirect1 == ID_ITEM_FREE){
+        inode.indirect1 = allocateIndirect();
     }
 
-    PseudoInode indirectNode(name, mainInode.indirect1);
-    //add all direct nodes of the first indirect
-    for(int32_t& direct : indirectNode.direct){
-        if(direct == ID_ITEM_FREE){
-            direct = address;
-            mainInode.Save(name, parent);
+    Indirect indirect(name, inode.indirect1);
+    for(int32_t& directAddress : indirect.direct){
+        if(directAddress == ID_ITEM_FREE){
+            directAddress = address;
+            inode.Save(name, parent);
+            indirect.Save(name, inode.indirect1);
             return true;
         }
+    }
+
+    if(inode.indirect2 == ID_ITEM_FREE){
+        inode.indirect2 = allocateIndirect();
     }
 
     //for all direct nodes of the second indirect
-    PseudoInode doubleIndirectNode(name, mainInode.indirect2);
-    for(int32_t indirect : doubleIndirectNode.direct) {
+    Indirect indirect2(name, inode.indirect2);
+    for(int32_t& simpleIndirectAddress : indirect2.direct) {
 
-        PseudoInode simpleIndirect{name, indirect};
-        for(int32_t& direct : simpleIndirect.direct){
-            if(direct == ID_ITEM_FREE){
-                direct = address;
-                mainInode.Save(name, parent);
+        if(simpleIndirectAddress == ID_ITEM_FREE){
+            simpleIndirectAddress = allocateInode();
+        }
+
+        Indirect simpleIndirect{name, simpleIndirectAddress};
+        for(int32_t& directAddress : simpleIndirect.direct){
+            if(directAddress == ID_ITEM_FREE){
+                directAddress = address;
+                simpleIndirect.Save(name, simpleIndirectAddress);
+                indirect2.Save(name, inode.indirect2);
+                inode.Save(name, parent);
                 return true;
             }
         }
@@ -215,30 +192,48 @@ bool FileSystem::setFirstFreeInodeTo(int32_t parent, int32_t address){
     return false;
 }
 
-
-int32_t FileSystem::allocateInode(){
-    int32_t emptyInodeIndex = inodeBitmap.GetEmptyIndex();
-    int32_t emptyInode = superBlock.inode_start_address + emptyInodeIndex * sizeof(PseudoInode);
-    inodeBitmap.Set(emptyInodeIndex, true, name, superBlock.inode_bitmap_start_address);
-    return emptyInode;
-}
-
-int32_t FileSystem::allocateCluster(){
-    int32_t emptyClusterIndex = clusterBitmap.GetEmptyIndex();
-    int32_t emptySpace = superBlock.data_start_address + emptyClusterIndex * CLUSTER_SIZE_B;
-    clusterBitmap.Set(emptyClusterIndex, true, name, superBlock.cluster_bitmap_start_address);
-    return emptySpace;
-}
-
 bool FileSystem::makeDirectory(const vector<string>& params){
 
-    int32_t emptySpace = allocateCluster();
-    int32_t emptyInode = allocateInode();
+    DirectoryItem workingDirectory;
 
-    setFirstFreeInodeTo(currentDir.inode, emptySpace);
+    if(!getDirectoryAtPath(const_cast<string &>(params[1]), workingDirectory))
+    {
+        cout << "PATH NOT FOUND" <<endl;
+        return false;
+    }
+
+    PseudoInode workingDirectoryInode(name, workingDirectory.inode);
+
+    if(fileExist(params[1], currentDir.inode))
+    {
+        cout << "EXIST" <<endl;
+        return false;
+    }
+
+    if(params[1].size() > 11)
+    {
+        cout << "File name is too long" <<endl;
+        return false;
+    }
 
     //name in correct format
-    char* directoryName = Utils::createIdentifier(params[1]);
+    char* directoryName = Utils::CreateIdentifier(params[1]);
+
+    int32_t emptyInode = allocateInode();
+    int32_t emptySpace = allocateCluster();
+
+    bool referenceSet = setFirstEmptyReferenceTo(workingDirectory.inode, emptySpace);
+    if(!referenceSet){
+        freeCluster(emptySpace);
+        freeInode(emptyInode);
+        return false;
+    }
+
+    PseudoInode inode(name, emptyInode);
+    inode.isDirectory = true;
+    inode.dot = emptySpace;
+    inode.dotDot = workingDirectoryInode.dot;
+    inode.Save(name, emptyInode);
 
     DirectoryItem directory(emptyInode, directoryName);
     directory.Save(name, emptySpace);
@@ -248,10 +243,32 @@ bool FileSystem::makeDirectory(const vector<string>& params){
     return true;
 }
 
+
+bool FileSystem::changeDirectory(const vector<string>& params){
+
+    vector<int32_t> dirs = getReferencedInodes(currentDir.inode);
+    DirectoryItem workingDirectory;
+
+    if(!getDirectoryAtPath(const_cast<string &>(params[1]), workingDirectory))
+    {
+        cout << "PATH NOT FOUND" <<endl;
+        return false;
+    }
+
+    if(!getFileInDirectory(workingDirectory, params[1], workingDirectory)){
+        cout << "PATH NOT FOUND" <<endl;
+        return false;
+    }
+
+    currentDir = workingDirectory;
+    return true;
+}
+
 void FileSystem::bindCommands(){
-    commandMap["f"] = bind(&FileSystem::format, this, _1);
+    commandMap["format"] = bind(&FileSystem::format, this, _1);
     commandMap["ls"] = bind(&FileSystem::list, this, _1);
-    commandMap["m"] = bind(&FileSystem::makeDirectory, this, _1);
+    commandMap["mkdir"] = bind(&FileSystem::makeDirectory, this, _1);
+    commandMap["cd"] = bind(&FileSystem::changeDirectory, this, _1);
 }
 
 void FileSystem::loadStructures(){
@@ -268,16 +285,142 @@ void FileSystem::loadStructures(){
     currentDir = root;
 }
 
-
 void FileSystem::Run(){
 
     while(true){
-        cout << "Enter command: " ;
+        cout << getCurrentPathDescriptor() + ":";
 
         vector<string> commandSplitStrings = Utils::GetCommand();
-        bool result = commandMap[commandSplitStrings[0]](commandSplitStrings);
-
-        if(!result)
+        if(commandSplitStrings[0] == "x"){
             break;
+        }
+
+        bool result = commandMap[commandSplitStrings[0]](commandSplitStrings);
     }
+}
+
+bool FileSystem::getDirectoryAtPath(string& path, DirectoryItem& file){
+    size_t pos = 0;
+    string token;
+
+    DirectoryItem directoryItem = currentDir;
+
+    if(path[0] == '/'){
+        directoryItem = root;
+        path.erase(0, 1);
+    }
+
+    vector<string> directories;
+    while ((pos = path.find('/')) != string::npos) {
+        string dir = path.substr(0, pos);
+        directories.push_back(dir);
+        path.erase(0, pos + 1);
+    }
+
+    for(int i = 0; i < directories.size(); ++i){
+        if(!getFileInDirectory(directoryItem, directories[i], directoryItem)){
+            return false;
+        }
+    }
+
+    file = directoryItem;
+    return true;
+}
+
+bool FileSystem::getFileInDirectory(DirectoryItem directory, const string& fileName, DirectoryItem& file){
+
+    vector<int32_t> dirs = getReferencedInodes(directory.inode);
+    for(int i = 0; i < dirs.size(); ++i) {
+
+        DirectoryItem dir(name, dirs[i]);
+        PseudoInode inode(name, dir.inode);
+
+        if(dir.item_name == fileName){
+            if(!inode.isDirectory)
+            {
+                return false;
+            }else{
+                file = dir;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+string FileSystem::getCurrentPathDescriptor(){
+    vector<string> dirs;
+
+    PseudoInode inode = getCurrentDirInode();
+
+    while(inode.dotDot != inode.dot){
+        DirectoryItem dir(name, inode.dot);
+        string dirName = dir.item_name;
+        dirs.push_back(dirName);
+
+        DirectoryItem dir2(name, inode.dotDot);
+        inode = PseudoInode(name, dir2.inode);
+    }
+
+    string path = "/";
+    for (int i = 0; i < dirs.size(); ++i) {
+        path += dirs[dirs.size() - i - 1];
+        if(i < dirs.size() - 1){
+            path += "/";
+        }
+    }
+
+    return path;
+}
+
+PseudoInode FileSystem::getCurrentDirInode(){
+    return PseudoInode(name, currentDir.inode);
+}
+
+bool FileSystem::fileExist(const string& fileName, int32_t inodeAddress){
+
+    vector<int32_t> dirs = getReferencedInodes(inodeAddress);
+
+    for(int i = 0; i < dirs.size(); ++i) {
+
+        DirectoryItem dir(name, dirs[i]);
+
+        if(dir.item_name == fileName){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int32_t FileSystem::allocateIndirect(){
+    //save
+    Indirect i;
+    int32_t address = allocateCluster();
+    i.Save(name, address);
+    return address;
+}
+
+int32_t FileSystem::allocateInode(){
+    int32_t emptyInodeIndex = inodeBitmap.GetEmptyIndex();
+    int32_t emptyInode = superBlock.inode_start_address + emptyInodeIndex * sizeof(PseudoInode);
+    inodeBitmap.Set(emptyInodeIndex, true, name, superBlock.inode_bitmap_start_address);
+    return emptyInode;
+}
+
+int32_t FileSystem::allocateCluster(){
+    int32_t emptyClusterIndex = clusterBitmap.GetEmptyIndex();
+    int32_t emptySpace = superBlock.data_start_address + emptyClusterIndex * CLUSTER_SIZE_B;
+    clusterBitmap.Set(emptyClusterIndex, true, name, superBlock.cluster_bitmap_start_address);
+    return emptySpace;
+}
+
+void FileSystem::freeCluster(int32_t address){
+    int32_t index = (address - superBlock.cluster_bitmap_start_address) / CLUSTER_SIZE_B;
+    clusterBitmap.Set(index, false, name, superBlock.cluster_bitmap_start_address);
+}
+
+void FileSystem::freeInode(int32_t address){
+    int32_t index = (address - superBlock.inode_bitmap_start_address) / sizeof(PseudoInode);
+    inodeBitmap.Set(index, false, name, superBlock.inode_bitmap_start_address);
 }

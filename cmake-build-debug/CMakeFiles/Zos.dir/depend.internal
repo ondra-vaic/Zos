@@ -13,9 +13,14 @@ CMakeFiles/Zos.dir/FileSystem.cpp.o
  /home/me/CLionProjects/Zos/DirectoryItem.h
  /home/me/CLionProjects/Zos/FileSystem.cpp
  /home/me/CLionProjects/Zos/FileSystem.h
+ /home/me/CLionProjects/Zos/Indirect.h
  /home/me/CLionProjects/Zos/PseudoInode.h
  /home/me/CLionProjects/Zos/SuperBlock.h
  /home/me/CLionProjects/Zos/Utils.h
+CMakeFiles/Zos.dir/Indirect.cpp.o
+ /home/me/CLionProjects/Zos/Indirect.cpp
+ /home/me/CLionProjects/Zos/Indirect.h
+ /home/me/CLionProjects/Zos/PseudoInode.h
 CMakeFiles/Zos.dir/PseudoInode.cpp.o
  /home/me/CLionProjects/Zos/PseudoInode.cpp
  /home/me/CLionProjects/Zos/PseudoInode.h
@@ -29,5 +34,6 @@ CMakeFiles/Zos.dir/main.cpp.o
  /home/me/CLionProjects/Zos/Bitmap.h
  /home/me/CLionProjects/Zos/DirectoryItem.h
  /home/me/CLionProjects/Zos/FileSystem.h
+ /home/me/CLionProjects/Zos/PseudoInode.h
  /home/me/CLionProjects/Zos/SuperBlock.h
  /home/me/CLionProjects/Zos/main.cpp

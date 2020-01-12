@@ -102,6 +102,12 @@
 		<Unit filename="/home/me/CLionProjects/Zos/FileSystem.h">
 			<Option target="Zos"/>
 		</Unit>
+		<Unit filename="/home/me/CLionProjects/Zos/Indirect.cpp">
+			<Option target="Zos"/>
+		</Unit>
+		<Unit filename="/home/me/CLionProjects/Zos/Indirect.h">
+			<Option target="Zos"/>
+		</Unit>
 		<Unit filename="/home/me/CLionProjects/Zos/PseudoInode.cpp">
 			<Option target="Zos"/>
 		</Unit>

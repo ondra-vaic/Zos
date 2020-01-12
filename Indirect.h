@@ -5,9 +5,16 @@
 #ifndef ZOS_INDIRECT_H
 #define ZOS_INDIRECT_H
 
+#include <stdint-gcc.h>
+#include <fstream>
+using namespace std;
 
-class Indirect {
+struct Indirect{
+    int32_t direct[5];
 
+    Indirect();
+    Indirect(const string& fileSystemName, int32_t offset);
+    void Save(const string& fileSystemName, int32_t offset);
 };
 
 

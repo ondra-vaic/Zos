@@ -204,6 +204,33 @@ FileSystem.cpp.s:
 	$(MAKE) -f CMakeFiles/Zos.dir/build.make CMakeFiles/Zos.dir/FileSystem.cpp.s
 .PHONY : FileSystem.cpp.s
 
+Indirect.o: Indirect.cpp.o
+
+.PHONY : Indirect.o
+
+# target to build an object file
+Indirect.cpp.o:
+	$(MAKE) -f CMakeFiles/Zos.dir/build.make CMakeFiles/Zos.dir/Indirect.cpp.o
+.PHONY : Indirect.cpp.o
+
+Indirect.i: Indirect.cpp.i
+
+.PHONY : Indirect.i
+
+# target to preprocess a source file
+Indirect.cpp.i:
+	$(MAKE) -f CMakeFiles/Zos.dir/build.make CMakeFiles/Zos.dir/Indirect.cpp.i
+.PHONY : Indirect.cpp.i
+
+Indirect.s: Indirect.cpp.s
+
+.PHONY : Indirect.s
+
+# target to generate assembly for a file
+Indirect.cpp.s:
+	$(MAKE) -f CMakeFiles/Zos.dir/build.make CMakeFiles/Zos.dir/Indirect.cpp.s
+.PHONY : Indirect.cpp.s
+
 PseudoInode.o: PseudoInode.cpp.o
 
 .PHONY : PseudoInode.o
@@ -330,6 +357,9 @@ help:
 	@echo "... FileSystem.o"
 	@echo "... FileSystem.i"
 	@echo "... FileSystem.s"
+	@echo "... Indirect.o"
+	@echo "... Indirect.i"
+	@echo "... Indirect.s"
 	@echo "... PseudoInode.o"
 	@echo "... PseudoInode.i"
 	@echo "... PseudoInode.s"

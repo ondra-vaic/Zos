@@ -12,9 +12,14 @@ CMakeFiles/Zos.dir/FileSystem.cpp.o: ../Bitmap.h
 CMakeFiles/Zos.dir/FileSystem.cpp.o: ../DirectoryItem.h
 CMakeFiles/Zos.dir/FileSystem.cpp.o: ../FileSystem.cpp
 CMakeFiles/Zos.dir/FileSystem.cpp.o: ../FileSystem.h
+CMakeFiles/Zos.dir/FileSystem.cpp.o: ../Indirect.h
 CMakeFiles/Zos.dir/FileSystem.cpp.o: ../PseudoInode.h
 CMakeFiles/Zos.dir/FileSystem.cpp.o: ../SuperBlock.h
 CMakeFiles/Zos.dir/FileSystem.cpp.o: ../Utils.h
+
+CMakeFiles/Zos.dir/Indirect.cpp.o: ../Indirect.cpp
+CMakeFiles/Zos.dir/Indirect.cpp.o: ../Indirect.h
+CMakeFiles/Zos.dir/Indirect.cpp.o: ../PseudoInode.h
 
 CMakeFiles/Zos.dir/PseudoInode.cpp.o: ../PseudoInode.cpp
 CMakeFiles/Zos.dir/PseudoInode.cpp.o: ../PseudoInode.h
@@ -28,6 +33,7 @@ CMakeFiles/Zos.dir/Utils.cpp.o: ../Utils.h
 CMakeFiles/Zos.dir/main.cpp.o: ../Bitmap.h
 CMakeFiles/Zos.dir/main.cpp.o: ../DirectoryItem.h
 CMakeFiles/Zos.dir/main.cpp.o: ../FileSystem.h
+CMakeFiles/Zos.dir/main.cpp.o: ../PseudoInode.h
 CMakeFiles/Zos.dir/main.cpp.o: ../SuperBlock.h
 CMakeFiles/Zos.dir/main.cpp.o: ../main.cpp
 

@@ -30,7 +30,7 @@ unsigned char Utils::SetBit(unsigned char num, unsigned char pos){
     return num |= 1 << pos;
 }
 
-char* Utils::createIdentifier(string s){
+char* Utils::CreateIdentifier(string s){
     char* identifier = new char[12];
     for (int i = 0; i < s.size(); ++i) {
         identifier[i] = s[i];
@@ -40,4 +40,16 @@ char* Utils::createIdentifier(string s){
         identifier[i] = '\0';
     }
     return identifier;
+}
+
+void Utils::SetZeros(const string& fileSystemName, int32_t offset, int32_t size){
+    fstream stream(fileSystemName, std::ios::binary | std::ios::in | std::ios::out);
+    stream.seekp(offset, ios_base::beg);
+
+    for (int j = 0; j < size; ++j) {
+        unsigned char zero = 0;
+        stream.write((char*)&zero, sizeof(zero));
+    }
+
+    stream.close();
 }

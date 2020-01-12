@@ -18,6 +18,30 @@ stdint-gcc.h
 fstream
 -
 
+/home/me/CLionProjects/Zos/FileSystem.cpp
+iostream
+-
+vector
+-
+functional
+-
+cstring
+-
+FileSystem.h
+/home/me/CLionProjects/Zos/FileSystem.h
+Utils.h
+/home/me/CLionProjects/Zos/Utils.h
+SuperBlock.h
+/home/me/CLionProjects/Zos/SuperBlock.h
+PseudoInode.h
+/home/me/CLionProjects/Zos/PseudoInode.h
+DirectoryItem.h
+/home/me/CLionProjects/Zos/DirectoryItem.h
+Bitmap.h
+/home/me/CLionProjects/Zos/Bitmap.h
+Indirect.h
+/home/me/CLionProjects/Zos/Indirect.h
+
 /home/me/CLionProjects/Zos/FileSystem.h
 vector
 -
@@ -33,6 +57,20 @@ DirectoryItem.h
 /home/me/CLionProjects/Zos/DirectoryItem.h
 Bitmap.h
 /home/me/CLionProjects/Zos/Bitmap.h
+PseudoInode.h
+/home/me/CLionProjects/Zos/PseudoInode.h
+
+/home/me/CLionProjects/Zos/Indirect.h
+stdint-gcc.h
+-
+fstream
+-
+
+/home/me/CLionProjects/Zos/PseudoInode.h
+stdint-gcc.h
+-
+fstream
+-
 
 /home/me/CLionProjects/Zos/SuperBlock.h
 stdint-gcc.h
@@ -40,23 +78,11 @@ stdint-gcc.h
 fstream
 -
 
-/home/me/CLionProjects/Zos/main.cpp
-iostream
--
+/home/me/CLionProjects/Zos/Utils.h
 vector
 -
-sstream
--
-map
--
-functional
+string
 -
 fstream
 -
-FileSystem.h
-/home/me/CLionProjects/Zos/FileSystem.h
-SuperBlock.h
-/home/me/CLionProjects/Zos/SuperBlock.h
-Bitmap.h
-/home/me/CLionProjects/Zos/Bitmap.h
 
