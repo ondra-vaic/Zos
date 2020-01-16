@@ -100,8 +100,6 @@ int main(int argc, char** argv) {
 //
 //    return 0;
 
-//    std::ifstream in("testingCommands");
-//    std::cin.rdbuf(in.rdbuf());
 
     FileSystem fileSystem(argv[1]);
     fileSystem.Run();

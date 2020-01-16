@@ -41,6 +41,12 @@ Bitmap.h
 /home/me/CLionProjects/Zos/Bitmap.h
 Indirect.h
 /home/me/CLionProjects/Zos/Indirect.h
+cstdio
+-
+iostream
+-
+sstream
+-
 
 /home/me/CLionProjects/Zos/FileSystem.h
 vector

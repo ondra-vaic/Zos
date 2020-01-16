@@ -23,9 +23,16 @@ private:
     bool list(const vector<string>& params);
     bool makeDirectory(const vector<string>& params);
     bool changeDirectory(const vector<string>& params);
+    bool inCopy(const vector<string>& params);
+    bool outCopy(const vector<string>& params);
+    bool load(const vector<string>& params);
+    bool pwd(const vector<string>& params);
+    bool info(const vector<string>& params);
+    bool cat(const vector<string>& params);
 
-    vector<int32_t> getReferencedInodes(int32_t inode);
-    bool setFirstEmptyReferenceTo(int32_t parent, int32_t address);
+    vector<int32_t> getReferencedClusters(int32_t inode);
+    bool setFirstEmptyReferenceTo(int32_t parent, int32_t address, int32_t size);
+    string getFileContents(int32_t fileInodeAddress);
 
     int32_t allocateIndirect();
     int32_t allocateCluster();
@@ -36,11 +43,13 @@ private:
     void bindCommands();
     void loadStructures();
 
-    bool getDirectoryAtPath(string& path, DirectoryItem& file);
+    bool getParentDirectoryAtPath(string& path, DirectoryItem& file);
     bool getFileInDirectory(DirectoryItem directory, const string& fileName, DirectoryItem& file);
     string getCurrentPathDescriptor();
     PseudoInode getCurrentDirInode();
+    int32_t createNewFile(int32_t parentDirectoryInodeAddress, const string& fileName);
     bool fileExist(const string& fileName, int32_t inodeAddress);
+    bool isDirectory(int32_t inodeAddress);
 
     map<string, function<bool(vector<string>)>> commandMap;
     SuperBlock superBlock;
