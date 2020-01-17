@@ -18,7 +18,7 @@ Bitmap::Bitmap(const string& fileSystemName, int32_t offset, int32_t length){
     ifstream stream(fileSystemName, std::ios::binary);
     stream.seekg(offset, ios_base::beg);
 
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < length / 8; ++i) {
         unsigned char byte = 0;
         stream.read((char*)&byte, sizeof(byte));
 
@@ -39,11 +39,13 @@ void Bitmap::Save(const string& fileSystemName, int32_t offset){
     int off = offset;
     for (int i = 0; i < bitmap.size(); ++i) {
 
+
         if(bitmap[i]){
             byte = Utils::SetBit(byte, (7 - (i % 8)));
         }
 
         if((i + 1) % 8 == 0){
+
             stream.write((char*)&byte, sizeof(byte));
             off++;
             byte = 0;
@@ -65,11 +67,23 @@ void Bitmap::Set(int32_t index, bool allocated, const string& fileSystemName, in
 
 int32_t Bitmap::GetEmptyIndex(){
 
-    for (int i = 0; i < bitmap.size(); ++i) {
+    for (int32_t i = 0; i < bitmap.size(); ++i) {
         if(bitmap[i] == false){
             return i;
         }
     }
 
     return -1;
+}
+
+vector<int32_t> Bitmap::GetAllocatedIndices(){
+    vector<int32_t> indices;
+
+    for (int32_t i = 0; i < bitmap.size(); ++i) {
+        if(bitmap[i] == true){
+            indices.push_back(i);
+        }
+    }
+
+    return indices;
 }

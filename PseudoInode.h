@@ -21,7 +21,7 @@ struct PseudoInode {
     bool isDirectory;               //soubor, nebo adresar
     int8_t references;              //počet odkazů na i-uzel, používá se pro hardlinky
     int32_t file_size;              //velikost souboru v bytech
-    int32_t direct[5];              // přímý odkaz na datové bloky
+    int32_t direct[NUM_DIRECT_NODES];              // přímý odkaz na datové bloky
     int32_t indirect1;              // 1. nepřímý odkaz (odkaz - datové bloky)
     int32_t indirect2;              // 2. nepřímý odkaz (odkaz - odkaz - datové bloky)
 

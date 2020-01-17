@@ -1,2 +1,8 @@
 format 600
-x
+mkdir a
+cd a
+incp d.jpg c
+rm c
+cd ..
+rmdir a
+ls .

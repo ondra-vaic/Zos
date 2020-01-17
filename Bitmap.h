@@ -20,6 +20,7 @@ struct Bitmap {
     bool IsSet(int32_t index);
     void Set(int32_t index, bool allocated, const string& fileSystemName, int32_t offset);
     int32_t GetEmptyIndex();
+    vector<int32_t> GetAllocatedIndices();
 
     vector<bool> bitmap;
 };
