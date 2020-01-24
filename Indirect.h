@@ -7,10 +7,11 @@
 
 #include <stdint-gcc.h>
 #include <fstream>
+#include "FileSystem.h"
 using namespace std;
 
 struct Indirect{
-    int32_t direct[5];
+    int32_t direct[NUM_DIRECT_IN_CLUSTER];
 
     Indirect();
     Indirect(const string& fileSystemName, int32_t offset);

@@ -6,6 +6,16 @@
 
 #IncludeRegexTransform: 
 
+/home/me/CLionProjects/Zos/Bitmap.cpp
+fstream
+-
+iostream
+-
+Bitmap.h
+/home/me/CLionProjects/Zos/Bitmap.h
+Utils.h
+/home/me/CLionProjects/Zos/Utils.h
+
 /home/me/CLionProjects/Zos/Bitmap.h
 vector
 -
@@ -71,6 +81,8 @@ stdint-gcc.h
 -
 fstream
 -
+FileSystem.h
+/home/me/CLionProjects/Zos/FileSystem.h
 
 /home/me/CLionProjects/Zos/PseudoInode.h
 stdint-gcc.h

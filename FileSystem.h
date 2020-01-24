@@ -16,6 +16,14 @@
 
 using namespace std;
 
+const int32_t CLUSTER_SIZE_B = 512 * 8;
+const int32_t FILE_EXPECTED_MIN_SIZE = 2 * 1024;
+const int32_t NUM_DIRECT_IN_CLUSTER = CLUSTER_SIZE_B / 4;
+const int32_t MAX_FILE_SIZE = 5 * CLUSTER_SIZE_B +
+        NUM_DIRECT_IN_CLUSTER * CLUSTER_SIZE_B +
+        NUM_DIRECT_IN_CLUSTER * NUM_DIRECT_IN_CLUSTER * CLUSTER_SIZE_B;
+
+
 class FileSystem {
 
 private:
@@ -53,6 +61,9 @@ private:
 
     void bindCommands();
     void loadStructures();
+
+    bool fileFitsInClusters(int32_t size);
+    bool canCreateFile(int32_t size);
 
     bool getParentDirectoryAtPath(string& path, DirectoryItem& file);
     bool getFileInDirectory(DirectoryItem directory, const string& fileName, DirectoryItem& file);

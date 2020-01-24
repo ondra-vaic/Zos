@@ -20,8 +20,6 @@
 using namespace std;
 using namespace std::placeholders;
 
-const int32_t CLUSTER_SIZE_B = 512 * 20;
-const int32_t FILE_EXPECTED_MIN_SIZE = 2 * 1024;
 
 FileSystem::FileSystem(char* name){
     this->name = string(name);
@@ -178,17 +176,25 @@ bool FileSystem::format(const vector<string>& params){
 
     int32_t diskSize = stoi(params[1]);
     int32_t sizeInBytes = diskSize * 1024 * 1024;
-    int32_t clusterCount = sizeInBytes / CLUSTER_SIZE_B;
+
     int32_t inodeCount = sizeInBytes / FILE_EXPECTED_MIN_SIZE;
 
+    //without space for cluster bitmap
+    int32_t metaDataPartSize = sizeof(SuperBlock) + inodeCount * sizeof(PseudoInode) + inodeCount / 8 + 1;
+
+    //figure out number of clusters, +1 because one bit extra for every cluster is for bitmap
+    int32_t clusterCount = ((sizeInBytes - metaDataPartSize) * 8) / (CLUSTER_SIZE_B * 8 + 1);
+
+    //int32_t clusterCount = sizeInBytes / CLUSTER_SIZE_B;
     int32_t clusterBitmapStartAddress = sizeof(SuperBlock);
 
-    //address is in bytes, so clusterCount / 8, +1 to align
+    //address is in bytes, so clusterCount / 8, +1 because integer division
     int32_t inodeBitmapStartAddress = clusterBitmapStartAddress + clusterCount / 8 + 1;
     int32_t inodeStartAddress = inodeBitmapStartAddress + inodeCount / 8 + 1;
 
     int32_t dataStartAddress = inodeStartAddress + inodeCount * sizeof(PseudoInode);
 
+    cout << clusterCount  <<endl;
     //super block
     superBlock = SuperBlock(Utils::CreateIdentifier("test"), Utils::CreateIdentifier("prvni fs"), diskSize,
                             CLUSTER_SIZE_B, clusterCount, inodeCount,
@@ -282,10 +288,12 @@ bool FileSystem::mkdir(const vector<string>& params){
         return false;
     }
 
-    int32_t newFileAddress = createNewFile(workingDirectory.inode, params[1]);
-    if(newFileAddress == -1){
+    if(!canCreateFile(CLUSTER_SIZE_B)){
+        cout << "Not enough space" << endl;
         return false;
     }
+
+    int32_t newFileAddress = createNewFile(workingDirectory.inode, params[1]);
 
     DirectoryItem directory(name, newFileAddress);
 
@@ -351,6 +359,11 @@ bool FileSystem::incp(const vector<string>& params){
     int32_t fileSize = fileToCopy.tellg();
     fileToCopy.seekg (0, ifstream::beg);
 
+    if(!canCreateFile(fileSize)){
+        cout << "Not enough space" << endl;
+        return false;
+    }
+
     int32_t newFileAddress = createNewFile(destination.inode, params[2]);
     if(newFileAddress == -1){
         return false;
@@ -404,7 +417,7 @@ bool FileSystem::outcp(const vector<string>& params){
         return false;
     }
 
-    fstream outStream(params[2], std::ios::binary | std::ios::in | std::ios::out);
+    fstream outStream(params[2], std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
     if(!outStream.good()){
         cout << "PATH NOT FOUND" <<endl;
         return false;
@@ -493,7 +506,8 @@ bool FileSystem::info(const vector<string>& params){
 
     PseudoInode fileInode(name, file.inode);
 
-    cout << file.item_name << " - " << fileInode.file_size << " - i-node " << file.inode << endl;
+    int inodeIndex = (file.inode - superBlock.inode_start_address) / sizeof(PseudoInode);
+    cout << file.item_name << " - " << fileInode.file_size << " - i-node " << inodeIndex << endl;
     return true;
 }
 
@@ -637,7 +651,6 @@ bool FileSystem::mv(const vector<string>& params){
     PseudoInode sourceInode(name, source.inode);
 
     removeDirectoryItemReferenceAt(sourceParentDir.inode, sourceInode.dot);
-
     setFirstEmptyReferenceTo(destination.inode, sourceInode.dot, sourceInode.file_size);
 
     sourceInode.dotDot = PseudoInode(name, destination.inode).dot;
@@ -682,6 +695,12 @@ bool FileSystem::cp(const vector<string>& params){
     }
 
     PseudoInode sourceInode(name, source.inode);
+
+    if(!canCreateFile(sourceInode.file_size)){
+        cout << "Not enough space" << endl;
+        return false;
+    }
+
     vector<int32_t> referencedClusters = getReferencedClusters(source.inode);
 
     DirectoryItem newFile = DirectoryItem(name, createNewFile(destination.inode, params[2]));
@@ -815,6 +834,7 @@ vector<int32_t> FileSystem::getAllInodeAddresses(){
 }
 
 void FileSystem::bindCommands(){
+
     commandMap["format"] = bind(&FileSystem::format, this, _1);
     commandMap["ls"] = bind(&FileSystem::list, this, _1);
     commandMap["mkdir"] = bind(&FileSystem::mkdir, this, _1);
@@ -878,14 +898,7 @@ int32_t FileSystem::createNewFile(int32_t parentDirectoryInodeAddress, const str
     int32_t emptyInodeAddress = allocateInode();
     int32_t emptySpaceAddress = allocateCluster();
 
-    bool referenceSet = setFirstEmptyReferenceTo(parentDirectory.inode, emptySpaceAddress, CLUSTER_SIZE_B);
-
-    if(!referenceSet){
-        cout << "Out of references in inode" << endl;
-        freeCluster(emptySpaceAddress);
-        freeInode(emptyInodeAddress);
-        return -1;
-    }
+    setFirstEmptyReferenceTo(parentDirectory.inode, emptySpaceAddress, CLUSTER_SIZE_B);
 
     PseudoInode inode(name, emptyInodeAddress);
     inode.dot = emptySpaceAddress;
@@ -1014,7 +1027,6 @@ bool FileSystem::fileExist(const string& fileName, int32_t parentDirInodeAddress
 }
 
 int32_t FileSystem::allocateIndirect(){
-    //save
     Indirect i;
     int32_t address = allocateCluster();
     i.Save(name, address);
@@ -1045,4 +1057,18 @@ void FileSystem::freeInode(int32_t address){
     empty.Save(name, address);
     int32_t index = (address - superBlock.inode_start_address) / sizeof(PseudoInode);
     inodeBitmap.Set(index, false, name, superBlock.inode_bitmap_start_address);
+}
+
+bool FileSystem::fileFitsInClusters(int32_t size){
+    int32_t numEmptyClusters = clusterBitmap.GetNumFreeSpaces();
+
+    int32_t numDirectClustersNeeded = size / CLUSTER_SIZE_B + 1;
+    int32_t numIndirectClustersNeeded = numDirectClustersNeeded / NUM_DIRECT_IN_CLUSTER + 2;
+    int32_t totalNumClusters = numDirectClustersNeeded + numIndirectClustersNeeded;
+
+    return numEmptyClusters > totalNumClusters;
+}
+
+bool FileSystem::canCreateFile(int32_t size){
+    return fileFitsInClusters(size) && inodeBitmap.GetEmptyIndex() != -1;
 }

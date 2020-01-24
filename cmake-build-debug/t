@@ -1,8 +1,0 @@
-format 600
-mkdir a
-cd a
-incp d.jpg c
-rm c
-cd ..
-rmdir a
-ls .

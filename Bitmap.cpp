@@ -76,6 +76,18 @@ int32_t Bitmap::GetEmptyIndex(){
     return -1;
 }
 
+int32_t Bitmap::GetNumFreeSpaces(){
+    int32_t num = 0;
+
+    for (int32_t i = 0; i < bitmap.size(); ++i) {
+        if(bitmap[i] == false){
+            num++;
+        }
+    }
+
+    return num;
+}
+
 vector<int32_t> Bitmap::GetAllocatedIndices(){
     vector<int32_t> indices;
 

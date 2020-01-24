@@ -18,6 +18,7 @@ struct Bitmap {
 
     void Save(const string& fileSystemName, int32_t offset);
     bool IsSet(int32_t index);
+    int32_t GetNumFreeSpaces();
     void Set(int32_t index, bool allocated, const string& fileSystemName, int32_t offset);
     int32_t GetEmptyIndex();
     vector<int32_t> GetAllocatedIndices();
