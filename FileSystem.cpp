@@ -194,7 +194,6 @@ bool FileSystem::format(const vector<string>& params){
 
     int32_t dataStartAddress = inodeStartAddress + inodeCount * sizeof(PseudoInode);
 
-    cout << clusterCount  <<endl;
     //super block
     superBlock = SuperBlock(Utils::CreateIdentifier("test"), Utils::CreateIdentifier("prvni fs"), diskSize,
                             CLUSTER_SIZE_B, clusterCount, inodeCount,
@@ -618,17 +617,17 @@ bool FileSystem::mv(const vector<string>& params){
         return false;
     }
 
-    if(!getFileInDirectory(destination, params[2], destination)){
-        cout << "PATH NOT FOUND" <<endl;
-        return false;
-    }
+//    if(!getFileInDirectory(destination, params[2], destination)){
+//        cout << "PATH NOT FOUND" <<endl;
+//        return false;
+//    }
 
     if(!isDirectory(destination.inode)){
         cout << "PATH NOT FOUND" <<endl;
         return false;
     }
 
-    if(fileExist(params[1], destination.inode))
+    if(fileExist(params[2], destination.inode))
     {
         cout << "EXIST" <<endl;
         return false;
@@ -649,6 +648,10 @@ bool FileSystem::mv(const vector<string>& params){
     }
 
     PseudoInode sourceInode(name, source.inode);
+
+    char* directoryName = Utils::CreateIdentifier(params[2]);
+    strcpy(source.item_name, directoryName);
+    source.Save(name, sourceInode.dot);
 
     removeDirectoryItemReferenceAt(sourceParentDir.inode, sourceInode.dot);
     setFirstEmptyReferenceTo(destination.inode, sourceInode.dot, sourceInode.file_size);
