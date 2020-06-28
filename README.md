@@ -19,5 +19,5 @@ V této seminární práci byl implementován pseudo-filesystém založený na i
 * outcp \<path1> <path2> //Nahraje soubor z pseudo-filesystému na pevný disk
 * load \<file> //Načte soubor s příkazy, které se sekvenčně vykonají
 
-
+Více informací můžete najít v dokumentaci [zde](Zos.pdf)
 
